@@ -40,6 +40,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.learn.jettipapp.component.InputField
 import com.learn.jettipapp.ui.theme.JetTipAppTheme
+import com.learn.jettipapp.util.calculateTotalTip
 import com.learn.jettipapp.widget.RoundIconButton
 
 class MainActivity : ComponentActivity() {
@@ -125,10 +126,14 @@ fun BillForm(
     val slidePositionState = remember {
         mutableStateOf(0f)
     }
+    val tipPrecentage = (slidePositionState.value * 100).toInt()
     val splitByState = remember {
         mutableStateOf(1)
     }
     val range = IntRange(start = 1, endInclusive = 100)
+    val tipAmountState = remember {
+        mutableStateOf(0.0)
+    }
 
     Surface(
         modifier = Modifier
@@ -155,7 +160,7 @@ fun BillForm(
                     keyboardController?.hide()
                 }
             )
-            if (!validState) {
+            if (validState) {
                 Column(
                     modifier.padding(horizontal = 10.dp),
                     verticalArrangement = Arrangement.spacedBy(12.dp)
@@ -202,22 +207,23 @@ fun BillForm(
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
                         Text(text = "Tip", modifier.align(alignment = Alignment.CenterVertically))
-                        Text(text = "$33.00", modifier.align(alignment = Alignment.CenterVertically))
+                        Text(text = "$ ${tipAmountState.value}", modifier.align(alignment = Alignment.CenterVertically))
                     }
 
                     Column(
                         verticalArrangement = Arrangement.Center,
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-                        Text(text = "33%")
+                        Text(text = "$tipPrecentage %")
 
                         // Slider
                         Slider(
                             value = slidePositionState.value,
                             onValueChange = { newVal ->
                                 slidePositionState.value = newVal
-                            },
-                            steps = 5
+                                tipAmountState.value =
+                                    calculateTotalTip(totalBill = totalBillsState.value.toDouble(), tipPrecentage = tipPrecentage)
+                            }
                         )
                     }
                 }
@@ -225,7 +231,6 @@ fun BillForm(
         }
     }
 }
-
 
 @Preview(showBackground = true)
 @Composable
