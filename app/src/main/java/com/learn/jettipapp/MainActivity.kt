@@ -24,6 +24,7 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Slider
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -116,6 +117,9 @@ fun BillForm(
         totalBillsState.value.trim().isNotEmpty()
     }
     val keyboardController = LocalSoftwareKeyboardController.current
+    val slidePositionState = remember {
+        mutableStateOf(0f)
+    }
 
     Surface(
         modifier = Modifier
@@ -143,43 +147,65 @@ fun BillForm(
                 }
             )
             if (!validState) {
-                Row(
-                    modifier.padding(start = 10.dp, end = 10.dp).fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween
+                Column(
+                    modifier.padding(horizontal = 10.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-                    Text(
-                        text = "Split",
-                        modifier.align(alignment = Alignment.CenterVertically)
-                    )
                     Row(
-                        modifier.padding(horizontal = 3.dp),
-                        horizontalArrangement = Arrangement.End
+                        modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween
                     ) {
-                        RoundIconButton(
-                            imageVector = Icons.Default.Remove,
-                            onClick = {
-
-                            }
-                        )
-
                         Text(
-                            text = "2",
-                            modifier.align(Alignment.CenterVertically).padding(start = 9.dp, end = 9.dp)
+                            text = "Split",
+                            modifier.align(alignment = Alignment.CenterVertically)
+                        )
+                        Row(
+                            horizontalArrangement = Arrangement.End
+                        ) {
+                            RoundIconButton(
+                                imageVector = Icons.Default.Remove,
+                                onClick = {
+
+                                }
                             )
 
-                        RoundIconButton(
-                            imageVector = Icons.Default.Add,
-                            onClick = {
+                            Text(
+                                text = "2",
+                                modifier.align(Alignment.CenterVertically).padding(start = 9.dp, end = 9.dp)
+                            )
 
+                            RoundIconButton(
+                                imageVector = Icons.Default.Add,
+                                onClick = {
+
+                                }
+                            )
+                        }
+                    }
+
+                    // Tip Row
+                    Row(
+                        modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Text(text = "Tip", modifier.align(alignment = Alignment.CenterVertically))
+                        Text(text = "$33.00", modifier.align(alignment = Alignment.CenterVertically))
+                    }
+
+                    Column(
+                        verticalArrangement = Arrangement.Center,
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Text(text = "33%")
+
+                        // Slider
+                        Slider(
+                            value = slidePositionState.value,
+                            onValueChange = { newVal ->
+                                slidePositionState.value = newVal
                             }
                         )
                     }
-                }
-            } else {
-                Box(
-
-                ) {
-
                 }
             }
         }
