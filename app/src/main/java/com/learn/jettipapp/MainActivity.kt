@@ -1,6 +1,7 @@
 package com.learn.jettipapp
 
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -88,6 +89,17 @@ fun TopHeader(totalPerPerson: Double = 134.0) {
 @Preview
 @Composable
 fun MainContent() {
+    BillForm() { billAmt ->
+        Log.d("AMT", "MainContent: ${billAmt.toInt()}")
+    }
+
+}
+
+@Composable
+fun BillForm(
+    modifier: Modifier = Modifier,
+    onValChange: (String) -> Unit = {}
+    ) {
     val totalBillsState = remember {
         mutableStateOf("")
     }
@@ -95,6 +107,7 @@ fun MainContent() {
         totalBillsState.value.trim().isNotEmpty()
     }
     val keyboardController = LocalSoftwareKeyboardController.current
+
     Surface(
         modifier = Modifier
             .padding(2.dp)
@@ -111,7 +124,9 @@ fun MainContent() {
                 isSingleLine = true,
                 onAction = KeyboardActions {
                     if(!validState) return@KeyboardActions
-                    // TODO - onValueChange
+                    onValChange(totalBillsState.value.trim())
+
+
                     keyboardController?.hide()
                 }
             )
