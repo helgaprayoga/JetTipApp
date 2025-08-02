@@ -48,8 +48,12 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             MyApp {
-                TopHeader()
-                MainContent()
+                Column(
+                    modifier = Modifier.padding(vertical = 12.dp)
+                ) {
+                    TopHeader()
+                    MainContent()
+                }
             }
         }
     }
@@ -70,9 +74,10 @@ fun TopHeader(totalPerPerson: Double = 134.0) {
     Surface(
         modifier = Modifier
             .fillMaxWidth()
+            .padding(15.dp)
             .height(150.dp)
             .clip(shape = RoundedCornerShape(corner = CornerSize(12.dp))),
-        color = Color(0xFFE9D7F7)
+        color = MaterialTheme.colorScheme.primaryContainer
     ) {
         Column(
             modifier = Modifier
@@ -95,7 +100,7 @@ fun TopHeader(totalPerPerson: Double = 134.0) {
     }
 }
 
-@Preview
+//@Preview
 @Composable
 fun MainContent() {
     BillForm() { billAmt ->
@@ -120,6 +125,10 @@ fun BillForm(
     val slidePositionState = remember {
         mutableStateOf(0f)
     }
+    val splitByState = remember {
+        mutableStateOf(1)
+    }
+    val range = IntRange(start = 1, endInclusive = 100)
 
     Surface(
         modifier = Modifier
@@ -165,19 +174,23 @@ fun BillForm(
                             RoundIconButton(
                                 imageVector = Icons.Default.Remove,
                                 onClick = {
-
+                                    splitByState.value =
+                                        if (splitByState.value > 1) splitByState.value - 1
+                                    else 1
                                 }
                             )
 
                             Text(
-                                text = "2",
+                                text = "${splitByState.value}",
                                 modifier.align(Alignment.CenterVertically).padding(start = 9.dp, end = 9.dp)
                             )
 
                             RoundIconButton(
                                 imageVector = Icons.Default.Add,
                                 onClick = {
-
+                                    if (splitByState.value < range.last) {
+                                        splitByState.value += 1
+                                    }
                                 }
                             )
                         }
@@ -203,7 +216,8 @@ fun BillForm(
                             value = slidePositionState.value,
                             onValueChange = { newVal ->
                                 slidePositionState.value = newVal
-                            }
+                            },
+                            steps = 5
                         )
                     }
                 }
@@ -213,10 +227,15 @@ fun BillForm(
 }
 
 
-//@Preview(showBackground = true)
+@Preview(showBackground = true)
 @Composable
 fun AppPreview() {
     MyApp {
-        TopHeader()
+        Column(
+            modifier = Modifier.padding(vertical = 12.dp)
+        ) {
+            TopHeader()
+            MainContent()
+        }
     }
 }
