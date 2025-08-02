@@ -7,14 +7,21 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
@@ -32,6 +39,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.learn.jettipapp.component.InputField
 import com.learn.jettipapp.ui.theme.JetTipAppTheme
+import com.learn.jettipapp.widget.RoundIconButton
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -95,6 +103,7 @@ fun MainContent() {
 
 }
 
+@Preview
 @Composable
 fun BillForm(
     modifier: Modifier = Modifier,
@@ -115,8 +124,11 @@ fun BillForm(
         shape = RoundedCornerShape(corner = CornerSize(8.dp)),
         border = BorderStroke(width = 1.dp, color = Color.LightGray)
     ) {
-        Column() {
-
+        Column(
+            modifier.padding(6.dp),
+            verticalArrangement = Arrangement.Top,
+            horizontalAlignment = Alignment.Start
+        ) {
             InputField(
                 valueState = totalBillsState,
                 labelId = "Enter Bill",
@@ -130,7 +142,46 @@ fun BillForm(
                     keyboardController?.hide()
                 }
             )
+            if (!validState) {
+                Row(
+                    modifier.padding(start = 10.dp, end = 10.dp).fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Text(
+                        text = "Split",
+                        modifier.align(alignment = Alignment.CenterVertically)
+                    )
+                    Row(
+                        modifier.padding(horizontal = 3.dp),
+                        horizontalArrangement = Arrangement.End
+                    ) {
+                        RoundIconButton(
+                            imageVector = Icons.Default.Remove,
+                            onClick = {
 
+                            }
+                        )
+
+                        Text(
+                            text = "2",
+                            modifier.align(Alignment.CenterVertically).padding(start = 9.dp, end = 9.dp)
+                            )
+
+                        RoundIconButton(
+                            imageVector = Icons.Default.Add,
+                            onClick = {
+
+                            }
+                        )
+                    }
+                }
+            } else {
+                Box(
+
+                ) {
+
+                }
+            }
         }
     }
 }
