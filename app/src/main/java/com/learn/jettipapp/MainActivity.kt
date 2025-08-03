@@ -110,33 +110,47 @@ fun MainContent() {
 fun BillForm(
     modifier: Modifier = Modifier,
     onValChange: (String) -> Unit = {}
-    ) {
+) {
+    // State untuk menyimpan input dari TextField (sumber kebenaran utama)
     val totalBillsState = remember {
         mutableStateOf("")
     }
+    // State untuk validasi, bergantung pada totalBillsState
     val validState = remember(totalBillsState.value) {
         totalBillsState.value.trim().isNotEmpty()
     }
     val keyboardController = LocalSoftwareKeyboardController.current
+
+    // State untuk posisi slider (0f hingga 1f)
     val slidePositionState = remember {
         mutableFloatStateOf(0f)
     }
-    val tipPercentage = (slidePositionState.floatValue * 100).toInt()
+
+    // State untuk jumlah orang
     val splitByState = remember {
         mutableIntStateOf(1)
     }
-    val range = IntRange(start = 1, endInclusive = 100)
-    val tipAmountState = remember {
-        mutableDoubleStateOf(0.0)
-    }
-    val totalPerPersonState = remember {
-        mutableDoubleStateOf(0.0)
-    }
+
+    // Compose akan otomatis memperbarui UI setiap kali salah satu state sumber (seperti totalBillsState) berubah.
+    // `toDoubleOrNull()` digunakan untuk mencegah crash jika input tidak valid.
+    val totalBill = totalBillsState.value.toDoubleOrNull() ?: 0.0
+    val tipPercentage = (slidePositionState.floatValue * 100).toInt()
+
+    // Hitung jumlah tip. Tidak perlu `remember` karena ini adalah kalkulasi cepat.
+    val tipAmount = calculateTotalTip(totalBill = totalBill, tipPercentage = tipPercentage)
+
+    // Hitung total per orang. Ini juga akan selalu ter-update secara otomatis.
+    val totalPerPerson = calculateTotalPerPerson(
+        totalBill = totalBill,
+        splitBy = splitByState.intValue,
+        tipPercentage = tipPercentage
+    )
 
     Column(
         modifier.padding(vertical = 12.dp)
     ) {
-        TopHeader(totalPerPerson = totalPerPersonState.value)
+        // TopHeader langsung menggunakan nilai `totalPerPerson` yang sudah dihitung
+        TopHeader(totalPerPerson = totalPerPerson)
 
         Surface(
             modifier = Modifier
@@ -156,9 +170,8 @@ fun BillForm(
                     enabled = true,
                     isSingleLine = true,
                     onAction = KeyboardActions {
-                        if(!validState) return@KeyboardActions
+                        if (!validState) return@KeyboardActions
                         onValChange(totalBillsState.value.trim())
-
 
                         keyboardController?.hide()
                     }
@@ -182,37 +195,25 @@ fun BillForm(
                                 RoundIconButton(
                                     imageVector = Icons.Default.Remove,
                                     onClick = {
-                                        splitByState.value =
-                                            if (splitByState.value > 1) {
-                                                splitByState.value - 1
-
+                                        // Kalkulasi `totalPerPerson` akan diperbarui secara otomatis.
+                                        splitByState.intValue =
+                                            if (splitByState.intValue > 1) {
+                                                splitByState.intValue - 1
                                             } else 1
-                                        totalPerPersonState.value =
-                                            calculateTotalPerPerson(
-                                                totalBill = totalBillsState.value.toDouble(),
-                                                splitBy = splitByState.value,
-                                                tipPercentage = tipPercentage
-                                            )
                                     }
                                 )
 
                                 Text(
-                                    text = "${splitByState.value}",
+                                    text = "${splitByState.intValue}",
                                     modifier.align(Alignment.CenterVertically).padding(start = 9.dp, end = 9.dp)
                                 )
 
                                 RoundIconButton(
                                     imageVector = Icons.Default.Add,
                                     onClick = {
-                                        if (splitByState.value < range.last) {
-                                            splitByState.value += 1
+                                        if (splitByState.intValue < 100) { // Menggunakan 100 sebagai batas atas
+                                            splitByState.intValue++
                                         }
-                                        totalPerPersonState.value =
-                                            calculateTotalPerPerson(
-                                                totalBill = totalBillsState.value.toDouble(),
-                                                splitBy = splitByState.value,
-                                                tipPercentage = tipPercentage
-                                            )
                                     }
                                 )
                             }
@@ -224,7 +225,8 @@ fun BillForm(
                             horizontalArrangement = Arrangement.SpaceBetween
                         ) {
                             Text(text = "Tip", modifier.align(alignment = Alignment.CenterVertically))
-                            Text(text = "$ ${tipAmountState.value}", modifier.align(alignment = Alignment.CenterVertically))
+                            // Nilai `tipAmount` yang dihitung langsung.
+                            Text(text = "$ ${String.format("%.2f", tipAmount)}", modifier.align(alignment = Alignment.CenterVertically))
                         }
 
                         Column(
@@ -235,24 +237,18 @@ fun BillForm(
 
                             // Slider
                             Slider(
-                                value = slidePositionState.value,
+                                value = slidePositionState.floatValue,
                                 onValueChange = { newVal ->
-                                    slidePositionState.value = newVal
-                                    tipAmountState.value =
-                                        calculateTotalTip(totalBill = totalBillsState.value.toDouble(), tipPercentage = tipPercentage)
-                                    totalPerPersonState.value =
-                                        calculateTotalPerPerson(
-                                            totalBill = totalBillsState.value.toDouble(),
-                                            splitBy = splitByState.value,
-                                            tipPercentage = tipPercentage
-                                        )
+                                    // Cukup perbarui posisi slider.
+                                    // `tipAmount` dan `totalPerPerson` akan dihitung ulang secara otomatis.
+                                    slidePositionState.floatValue = newVal
                                 }
                             )
                         }
                     }
                 } else {
                     Box(
-                        
+
                     ) {
 
                     }
